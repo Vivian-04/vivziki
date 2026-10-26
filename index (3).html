@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Chat · Ziki proposal</title>
+<meta name="description" content="A Ziki proposal by Vee: when an agent needs you, reply in a live chat with quick replies and watch it work.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --page:#070f22; --surface:#0e1a33; --deep:#0a1530; --raised:#1b2a47; --line:#22324f;
+  --ink:#f1f5fd; --text:#c9d3e6; --muted:#8f9cb8; --blue:#2e6fef; --link:#6aa0ff;
+  --green:#4ade80; --green-bg:#0f3326; --rev:#9cc2ff; --rev-bg:#17305e;
+  --amber:#f5c04a; --amber-bg:#201d17; --amber-line:#6e5414;
+  --red:#ff7b78; --red-bg:#2a1416; --red-line:#5c2427;
+  --pts:#f5c04a; --pts-bg:#3a2c0c;
+  --new:#c7a6ff; --new-bg:#2a1c4f; --new-line:#7b55e0;
+}
+*{box-sizing:border-box}
+html,body{background:var(--page)}
+body{margin:0;color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+a{color:var(--link);text-decoration:none;font-weight:600}
+svg{flex:none}
+.wrap{max-width:1136px;margin:0 auto;padding:0 16px}
+
+/* ---------- top bar ---------- */
+.bar{background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .wrap{height:78px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px}
+.ws{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;padding-left:14px;border-left:1px solid var(--line)}
+.navlinks{display:flex;gap:4px;margin-left:10px}
+.navlinks span{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--text);padding:7px 10px;border-radius:10px}
+.navlinks span.on{background:var(--raised);color:var(--link)}
+.navright{margin-left:auto;display:flex;align-items:center;gap:8px}
+.chip-pill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;font-size:13px}
+.chip-pill.me{padding:4px 12px 4px 4px}
+.face{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 50% 36%,#7a4e33 0 30%,#14301f 31% 60%,#0d1f16 61%);border:1px solid #2a3a30}
+.pts{white-space:nowrap;display:flex;align-items:center;gap:6px;background:var(--pts-bg);color:var(--pts);border-radius:999px;padding:9px 12px;font-weight:700;font-size:13px}
+.bell{position:relative;padding:6px;margin-left:6px}
+.bell b{position:absolute;top:-6px;right:-6px;background:var(--blue);color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:0 5px;line-height:15px}
+
+main.wrap{padding-top:40px;padding-bottom:140px}
+
+
+
+
+/* ---------- issues / inbox page ---------- */
+.frame{background:var(--surface);border-radius:18px;overflow:hidden}
+.fhead{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:1px solid var(--line)}
+.crumb{color:var(--text);font-size:14.5px;display:flex;gap:10px;align-items:center}
+.crumb b{color:var(--ink)}
+.ficons{margin-left:auto;display:flex;gap:8px;align-items:center}
+.ic{width:32px;height:32px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center}
+.plat{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:13.5px;font-weight:700}
+.n{display:inline-block;font:500 10.5px/16px "JetBrains Mono",ui-monospace,monospace;background:var(--raised);color:var(--text);border-radius:5px;padding:1px 6px}
+.fbody{padding:20px 24px 24px}
+.row1{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.inbox{display:flex;gap:8px;align-items:center;background:var(--blue);color:#fff;font-weight:700;border-radius:8px;padding:10px 14px;font-size:14px}
+.inbox .n{background:rgba(255,255,255,.22);color:#fff}
+.status{margin-left:auto;display:flex;gap:18px;align-items:center;background:var(--raised);border-radius:10px;padding:8px 14px;font-size:13.5px;font-weight:600;flex-wrap:wrap}
+.status span{display:flex;gap:7px;align-items:center}
+.status .n{background:none;padding:0;color:var(--muted)}
+.how{display:grid;grid-template-columns:1fr 280px;border:1px solid var(--line);border-radius:14px;margin-bottom:24px}
+.how .l{display:flex;gap:14px;padding:16px}
+.how .ib{width:38px;height:38px;border-radius:10px;background:#16294a;display:grid;place-items:center;flex:none}
+.how b{font-size:14.5px}
+.how p{margin:3px 0 0;font-size:14px;color:var(--text)}
+.how .r{border-left:1px solid var(--line);padding:16px 14px}
+.yours{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--text)}
+.ya{display:flex;gap:10px;margin-top:8px}
+.robot{width:30px;height:30px;border-radius:50%;background:#3a2410;display:grid;place-items:center;font-size:15px;flex:none}
+.ya b{font-size:14px}
+.work{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;color:var(--text)}
+.off{display:inline-block;font-size:11px;font-weight:700;background:var(--raised);color:var(--text);border-radius:6px;padding:1px 7px;margin-top:4px}
+.on-now{background:var(--green-bg);color:var(--green)}
+.ya p{margin:4px 0 0;font-size:13px;color:var(--text)}
+.ya small{font-size:11.5px;color:var(--muted)}
+.tabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto}
+.tabs span{display:flex;gap:7px;align-items:center;padding:8px 12px;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;border-bottom:2px solid var(--line)}
+.tabs span.on{color:var(--ink);font-weight:700;border-bottom-color:var(--blue)}
+.list{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.item{display:flex;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .t{flex:1;min-width:0}
+.item .q{font-weight:700;font-size:14.5px}
+.item .m{font-size:13px;color:var(--text);margin-top:1px}
+.sev{font-size:11px;font-weight:800;border-radius:6px;padding:1px 7px;margin-left:6px}
+.sev.low{background:var(--green-bg);color:var(--green)} .sev.high{background:var(--red-bg);color:var(--red)}
+.item .a{display:flex;gap:8px}
+.item .a button{border:1px solid var(--line);border-radius:8px;padding:7px 14px;font-weight:700;font-size:13px}
+.item .a .yes{background:var(--blue);border-color:var(--blue);color:#fff}
+.auto{border:1px solid #1d4d38;background:#0b241b;border-radius:14px;padding:12px 16px;margin-bottom:12px}
+.auto .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-weight:700;font-size:14px;color:var(--green)}
+.auto ul{margin:6px 0 0;padding-left:20px;color:var(--text);font-size:13.5px}
+.empty{text-align:center;padding:56px 16px}
+.empty b{display:block;font-size:16px}
+.empty span{color:var(--text);font-size:14.5px}
+.empty a{display:block;margin-top:14px}
+
+
+
+
+main.wrap{padding-top:40px;padding-bottom:120px}
+.new{font-size:10px;font-weight:800;letter-spacing:.07em;color:var(--new);background:var(--new-bg);border:1px solid var(--new-line);border-radius:6px;padding:1px 6px}
+.item .a .chatbtn{display:flex;gap:7px;align-items:center;background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 0 rgba(46,111,239,.6);animation:ping 2s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 10px rgba(46,111,239,0)}100%{box-shadow:0 0 0 0 rgba(46,111,239,0)}}
+.item .preview{font-size:13px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item.done .q{color:var(--text)}
+.pill-done{font-size:12px;font-weight:700;color:var(--green);background:var(--green-bg);border-radius:999px;padding:3px 10px}
+.footnote{color:var(--muted);font-size:12px;margin-top:20px}
+
+/* chat drawer */
+.scrim{position:fixed;inset:0;background:rgba(3,7,18,.55);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:21;
+  display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:-20px 0 60px rgba(0,0,0,.45)}
+.drawer.open{transform:none}
+.dh{display:flex;gap:12px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
+.dh .who{flex:1;min-width:0}
+.dh b{font-size:15px}
+.dh small{display:flex;gap:6px;align-items:center;color:var(--text);font-size:12.5px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.dh .close{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);font-size:18px;color:var(--text)}
+.ctx{padding:10px 18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--text);display:flex;gap:8px;align-items:center;background:var(--deep)}
+.msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.m{max-width:88%;font-size:14.5px;line-height:1.5}
+.m.agent{align-self:flex-start;background:var(--raised);border-radius:4px 16px 16px 16px;padding:10px 13px}
+.m.me{align-self:flex-end;background:var(--blue);color:#fff;border-radius:16px 4px 16px 16px;padding:9px 13px}
+.typing{align-self:flex-start;background:var(--raised);border-radius:4px 16px 16px 16px;padding:12px 14px;display:flex;gap:4px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--text);animation:bounce 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{40%{transform:translateY(-5px);opacity:.5}}
+.card{align-self:stretch;border:1px solid var(--line);background:var(--deep);border-radius:14px;padding:12px 14px;font-size:14px}
+.card .ttl{font-size:12px;font-weight:700;letter-spacing:.07em;color:var(--text);text-transform:uppercase;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.card ol{margin:0;padding-left:20px}
+.card li{margin:4px 0}
+.rule{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-size:12.5px;font-weight:600;color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:999px;padding:3px 10px}
+.steps{list-style:none;padding:0;margin:0}
+.steps li{display:flex;gap:10px;align-items:center;padding:5px 0;color:var(--muted)}
+.steps li.doing{color:var(--ink)}
+.steps li.ok{color:var(--text)}
+.ic2{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:11px}
+.doing .ic2{border-color:var(--blue);border-top-color:transparent;animation:spin .8s linear infinite}
+.ok .ic2{background:var(--green);border-color:var(--green);color:#06230f;font-weight:900}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bar2{height:5px;background:var(--raised);border-radius:99px;margin-top:10px;overflow:hidden}
+.bar2 i{display:block;height:100%;width:0;background:var(--blue);transition:width .5s}
+.stop{margin-top:10px;font-size:13px;font-weight:700;color:var(--red);border:1px solid var(--red-line);background:var(--red-bg);border-radius:8px;padding:6px 12px}
+.pr{display:flex;gap:10px;align-items:center}
+.pr .tag{white-space:nowrap;font:500 12px "JetBrains Mono",ui-monospace,monospace;background:var(--green-bg);color:var(--green);border-radius:6px;padding:2px 8px}
+.pr-meta{font-size:12.5px;color:var(--text);margin-top:4px}
+.pr-acts{display:flex;gap:8px;margin-top:10px}
+.pr-acts button{font-size:13px;font-weight:700;border-radius:8px;padding:7px 12px;border:1px solid var(--line)}
+.pr-acts .yes{background:var(--blue);border-color:var(--blue);color:#fff}
+.chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 10px}
+.chips button{font-size:13.5px;font-weight:600;border:1px solid var(--line);background:var(--deep);color:var(--ink);border-radius:999px;padding:7px 13px;transition:background .15s,border-color .15s}
+.chips button:hover{border-color:var(--blue);background:#13254a}
+.chips button.go{background:var(--blue);border-color:var(--blue);color:#fff}
+.composer{display:flex;gap:8px;padding:12px 14px 16px;border-top:1px solid var(--line)}
+.composer input{flex:1;min-width:0;background:var(--page);border:1px solid var(--line);border-radius:12px;padding:11px 14px;color:var(--ink);font:inherit;font-size:14.5px}
+.composer input::placeholder{color:var(--muted)}
+.composer button{width:44px;border-radius:12px;background:var(--blue);display:grid;place-items:center}
+.composer button:disabled{opacity:.4;cursor:default}
+@media (max-width:980px){
+  .navlinks,.chip-pill.me span,.chip-pill.ag{display:none}
+  .how{grid-template-columns:1fr}
+  .how .r{border-left:0;border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .status{margin-left:0}
+  .ficons .ic:not(:last-of-type){display:none}
+  .fhead,.fbody{padding-left:16px;padding-right:16px}
+  .item{flex-wrap:wrap}
+  .item .a{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+</style>
+</head>
+<body>
+
+<header class="bar"><div class="wrap">
+  <span class="brand"><svg width="18" height="22" viewBox="0 0 18 22" aria-hidden="true"><path d="M3 2.5h11.5L9 8.5" stroke="#2e6fef" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9.5L3.5 19.5H15" stroke="#2e6fef" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11.5h8" stroke="#2e6fef" stroke-width="2.6" stroke-linecap="round"/></svg>ziki</span>
+  <span class="ws">Ziki <svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" stroke="#8f9cb8" stroke-width="1.5" fill="none"/></svg></span>
+  <nav class="navlinks">
+    <span id="nav-product" class="on"><svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>Product</span>
+    <span><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 6.5h2l4-3v9l-4-3H3z" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M11.5 6a3 3 0 010 4M13 4.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>Marketing</span>
+    <span><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 2l5 2v4c0 3-2.2 5-5 6-2.8-1-5-3-5-6V4z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>Security</span>
+  </nav>
+  <div class="navright">
+    <span class="chip-pill ag" id="nav-agents" style="cursor:pointer"><svg width="15" height="15" viewBox="0 0 16 16"><rect x="2.5" y="5" width="11" height="8" rx="2" stroke="#6aa0ff" stroke-width="1.4" fill="none"/><path d="M6 5V3.5h4V5" stroke="#6aa0ff" stroke-width="1.4" fill="none"/></svg>Agents <svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" stroke="#c9d3e6" stroke-width="1.5" fill="none"/></svg></span>
+    <span class="chip-pill me"><i class="face"></i><span>Vivian Nduka</span><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" stroke="#8f9cb8" stroke-width="1.5" fill="none"/></svg></span>
+    <span class="pts"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M5 2.5h6v3.5a3 3 0 01-6 0z M5 3.5H3v1a2 2 0 002 2 M11 3.5h2v1a2 2 0 01-2 2 M8 9v3 M5.5 13.5h5" stroke="#f5c04a" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>1227 pts</span>
+    <span class="bell"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M4.5 13V8a4.5 4.5 0 019 0v5l1.5 1.5h-12z M7.5 16h3" stroke="#f1f5fd" stroke-width="1.5" fill="none"/></svg><b>21</b></span>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <div class="frame">
+    <div class="fhead">
+      <div class="crumb">Ziki <span>›</span> <b>Issues</b></div>
+      <div class="ficons">
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" stroke="#f1f5fd" stroke-width="1.5" fill="none"/><path d="M10.5 10.5L14 14" stroke="#f1f5fd" stroke-width="1.5"/></svg></span>
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M2.5 3h11L9.5 8v5l-3-1.5V8z" stroke="#f1f5fd" stroke-width="1.4" fill="none"/></svg></span>
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M5 13V3M5 3L2.5 5.5M5 3l2.5 2.5M11 3v10m0 0l-2.5-2.5M11 13l2.5-2.5" stroke="#f1f5fd" stroke-width="1.4" fill="none"/></svg></span>
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke="#f1f5fd" stroke-width="1.5"/></svg></span>
+        <span class="plat">🖥 Platform: All <span class="n">0</span></span>
+      </div>
+    </div>
+    <div class="fbody">
+      <div class="row1">
+        <span class="inbox"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M2 9l2-6h8l2 6v4H2z M2 9h3.5l1 1.5h3l1-1.5H14" stroke="#fff" stroke-width="1.3" fill="none"/></svg>Inbox <span class="n" id="c1">1</span></span>
+        <div class="status">
+          <span>◌ Open <span class="n">109</span></span>
+          <span>⏱ In progress <span class="n" id="prog">46</span></span>
+          <span style="color:var(--green)">✓ <span style="color:var(--ink)">Done</span> <span class="n">101</span></span>
+          <span>All <span class="n">262</span></span>
+        </div>
+      </div>
+
+      <div class="how">
+        <div class="l">
+          <span class="ib"><svg width="17" height="17" viewBox="0 0 16 16"><path d="M2 9l2-6h8l2 6v4H2z M2 9h3.5l1 1.5h3l1-1.5H14" stroke="#9cc2ff" stroke-width="1.3" fill="none"/></svg></span>
+          <div><b>How the Inbox works</b><p>Agents work through issues on their own and stop here when they need a person: to answer a question, give feedback on a design, or weigh in on a new idea.</p></div>
+        </div>
+        <div class="r">
+          <div class="yours">YOUR AGENTS</div>
+          <div class="ya">
+            <span class="robot">🤖</span>
+            <div><b>ChatGPT Assistant</b><span class="work">Work</span><br>
+              <span class="off on-now" id="agentState">Waiting on you</span>
+              <p id="agentAct">Has a question about #198</p><small id="agentSub">Asked 2 minutes ago</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <span class="on">Need your input <span class="n" id="c2">1</span></span>
+        <span>Design feedback needed <span class="n">0</span></span>
+        <span>New ideas <span class="n">0</span></span>
+      </div>
+      <div class="list">
+        <div class="item" id="item">
+          <span class="robot">🤖</span>
+          <div class="t">
+            <div class="q">ChatGPT Assistant wants to take #198 <span class="sev high">High</span></div>
+            <div class="m">Payments sometimes charged twice</div>
+            <div class="preview" id="preview">“I found the cause. Can I walk you through my plan?”</div>
+          </div>
+          <div class="a" id="itemAct"><button class="chatbtn" id="open"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z" stroke="#fff" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg>Reply in chat <span class="new" style="color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.35)">NEW</span></button></div>
+        </div>
+      </div>
+      <p class="footnote">Proposal by Vee (HNG 15): agents' questions open as a live chat instead of Allow / Decline. Demo with made-up data.</p>
+    </div>
+  </div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Chat with ChatGPT Assistant" aria-hidden="true">
+  <div class="dh">
+    <span class="robot">🤖</span>
+    <div class="who"><b>ChatGPT Assistant</b><small><i class="dot"></i><span id="dstate">Online · waiting on you</span></small></div>
+    <button class="close" id="close" aria-label="Close chat">×</button>
+  </div>
+  <div class="ctx">Issue <b style="color:var(--ink)">#198</b> · Payments sometimes charged twice <span class="sev high">High</span></div>
+  <div class="msgs" id="msgs" aria-live="polite"></div>
+  <div class="chips" id="chips"></div>
+  <form class="composer" id="form">
+    <input id="input" placeholder="Message your agent…" autocomplete="off" aria-label="Message your agent">
+    <button id="send" aria-label="Send" disabled><svg width="18" height="18" viewBox="0 0 18 18"><path d="M3 9h11M10 4.5L14.5 9 10 13.5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </form>
+</aside>
+
+
+<script>
+const $ = (id) => document.getElementById(id);
+const msgs = $("msgs"), chips = $("chips");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wait = (ms) => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+const esc = (s) => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let rules = [];           // instructions the person gave in chat
+let phase = "plan";       // plan → working → done
+let started = false, stopped = false, busy = false;
+
+function scroll(){ msgs.scrollTop = msgs.scrollHeight; }
+function add(html, cls){ const d = document.createElement("div"); d.className = cls; d.innerHTML = html; msgs.appendChild(d); scroll(); return d; }
+function me(text){ add(esc(text), "m me"); }
+
+async function agent(text){
+  busy = true; setChips([]);
+  const t = add("<i></i><i></i><i></i>", "typing");
+  await wait(700 + Math.min(text.length * 8, 700));
+  t.remove();
+  const b = add("", "m agent");
+  if (reduce){ b.innerHTML = text; }
+  else {
+    const words = text.split(" ");
+    for (let i = 0; i < words.length; i++){ b.innerHTML = words.slice(0, i+1).join(" "); scroll(); await wait(28); }
+  }
+  busy = false;
+  return b;
+}
+
+function planCard(){
+  const steps = rules.includes("db")
+    ? ["Keep a short list of payment IDs we've already handled", "Ignore a webhook if its payment ID is on the list", "Add a test that sends the same webhook twice", "Open a PR for review"]
+    : ["Save each payment ID in the database", "Skip a webhook if that payment ID was already processed", "Add a test that sends the same webhook twice", "Open a PR for review"];
+  const pills = rules.map(r => `<span class="rule">📌 ${r === "db" ? "No database changes" : esc(r)}</span>`).join(" ");
+  add(`<div class="ttl">My plan <span class="new">${steps.length} steps</span></div><ol>${steps.map(s => `<li>${s}</li>`).join("")}</ol>${pills ? `<div>${pills}</div>` : ""}`, "card");
+  return steps;
+}
+
+function setChips(list){
+  chips.innerHTML = "";
+  for (const [label, fn, go] of list){
+    const b = document.createElement("button"); b.type = "button"; b.textContent = label; if (go) b.className = "go";
+    b.onclick = () => { if (!busy) { me(label); fn(); } };
+    chips.appendChild(b);
+  }
+  requestAnimationFrame(scroll);
+}
+const planChips = () => setChips([
+  ["Go ahead", goAhead, true],
+  ["Explain it simply", explain],
+  ["Don't touch the database", noDb],
+]);
+
+async function intro(){
+  started = true;
+  await agent("Hi Vivian 👋 I looked into <b>#198</b>. When a payment goes through, our payment provider sometimes sends the “paid” message twice, and we charge the customer both times.");
+  await agent("Here's how I'd fix it:");
+  planCard();
+  planChips();
+}
+async function explain(){
+  await agent("Sure! Imagine a cashier who hears “ring it up” twice and charges you twice. I'll give the cashier a notebook: before charging, check if this receipt number is already written down. If it is, don't charge again.");
+  setChips([["Go ahead", goAhead, true], ["Don't touch the database", noDb]]);
+}
+async function noDb(){
+  if (!rules.includes("db")) rules.push("db");
+  await agent("Got it, no database changes. Here's the updated plan:");
+  planCard();
+  setChips([["Go ahead", goAhead, true], ["Explain it simply", explain]]);
+}
+async function custom(text){
+  rules.push(text);
+  await agent(`Noted: I'll follow “${esc(text)}”. I've added it to the plan:`);
+  planCard();
+  setChips([["Go ahead", goAhead, true], ["Explain it simply", explain]]);
+}
+
+async function goAhead(){
+  phase = "working"; stopped = false;
+  $("dstate").textContent = "Online · working on #198";
+  $("agentState").textContent = "Working"; $("agentAct").textContent = "Working on #198"; $("agentSub").textContent = "You approved the plan in chat";
+  $("prog").textContent = "47";
+  await agent("On it 🚀 You can watch here, and stop me anytime.");
+  const steps = rules.includes("db")
+    ? ["Reading the payment webhook code", "Adding the “already handled” check", "Writing a test: same webhook sent twice", "Running all payment tests", "Opening a pull request"]
+    : ["Reading the payment webhook code", "Saving payment IDs and skipping repeats", "Writing a test: same webhook sent twice", "Running all payment tests", "Opening a pull request"];
+  const card = add(`<div class="ttl">Live progress</div><ul class="steps">${steps.map(s => `<li><span class="ic2"></span>${s}</li>`).join("")}</ul><div class="bar2"><i></i></div><button class="stop" type="button">■ Stop</button>`, "card");
+  const lis = card.querySelectorAll("li"), fill = card.querySelector(".bar2 i"), stopBtn = card.querySelector(".stop");
+  stopBtn.onclick = () => { stopped = true; stopBtn.remove(); };
+  setChips([]);
+  for (let i = 0; i < lis.length; i++){
+    if (stopped) break;
+    lis[i].className = "doing"; scroll();
+    await wait(1100);
+    if (stopped) { lis[i].className = ""; break; }
+    lis[i].className = "ok"; lis[i].querySelector(".ic2").textContent = "✓";
+    fill.style.width = ((i+1) / lis.length * 100) + "%";
+  }
+  stopBtn.remove();
+  if (stopped){
+    phase = "plan";
+    $("dstate").textContent = "Online · paused";
+    $("agentState").textContent = "Paused"; $("agentAct").textContent = "Stopped by you on #198";
+    me("Stop");
+    await agent("Stopped ✋ Nothing was pushed, everything is undone. Want me to try a different way, or change the plan?");
+    setChips([["Start again", goAhead, true], ["Don't touch the database", noDb], ["Explain it simply", explain]]);
+    return;
+  }
+  phase = "done";
+  add(`<div class="pr"><span class="tag">PR #311</span><b>Stop double charges on payment webhooks</b></div>
+    <div class="pr-meta">2 files changed · 1 new test · all tests passing ✓</div>
+    <div class="pr-acts"><button class="yes" type="button">View changes</button><button type="button">Ask a reviewer</button></div>`, "card");
+  await agent("Done ✅ The fix is ready for review. Two reviewers will check it before anything is merged.");
+  $("dstate").textContent = "Online";
+  $("agentState").textContent = "Waiting for review"; $("agentAct").textContent = "PR #311 ready for #198"; $("agentSub").textContent = "Finished just now";
+  $("c1").textContent = "0"; $("c2").textContent = "0";
+  $("item").classList.add("done");
+  $("preview").textContent = "“Done ✅ The fix is ready for review.”";
+  $("itemAct").innerHTML = '<span class="pill-done">✓ PR #311 ready</span>';
+  setChips([["Thanks!", async () => { await agent("Anytime 🙌 I'll message you here if the reviewers ask for changes."); setChips([]); }]]);
+}
+
+// open / close
+function openChat(){
+  $("drawer").classList.add("open"); $("scrim").classList.add("open"); $("drawer").setAttribute("aria-hidden", "false");
+  setTimeout(() => $("input").focus(), 300);
+  if (!started) intro();
+}
+function closeChat(){ $("drawer").classList.remove("open"); $("scrim").classList.remove("open"); $("drawer").setAttribute("aria-hidden", "true"); }
+$("open").onclick = openChat;
+$("close").onclick = closeChat;
+$("scrim").onclick = closeChat;
+addEventListener("keydown", (e) => { if (e.key === "Escape") closeChat(); });
+
+// typing your own message
+$("input").addEventListener("input", () => { $("send").disabled = !$("input").value.trim(); });
+$("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = $("input").value.trim(); if (!text || busy) return;
+  $("input").value = ""; $("send").disabled = true; me(text);
+  const t = text.toLowerCase();
+  if (phase === "working"){ agent("I'm mid-task. Tap ■ Stop if you want me to pause."); return; }
+  if (/\b(go|yes|ok|okay|sure|proceed|do it|approve)\b/.test(t)) goAhead();
+  else if (/simpl|explain|what|why|how/.test(t)) explain();
+  else if (/database|db/.test(t)) noDb();
+  else if (phase === "done") agent("Thanks! I'll keep you posted here if the reviewers ask for changes.");
+  else custom(text);
+});
+</script>
+
+</body>
+</html>
