@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Small Fixes Switch · Ziki proposal</title>
+<meta name="description" content="A Ziki proposal by Vee: one switch that lets an agent take small fixes without asking, shown inside Ziki's Agents settings and Inbox.">
+<style>
+:root{
+  --bg:#0a1124; --nav:#0c1530; --surface:#0f1a35; --surface2:#13203f; --line:#22305a;
+  --ink:#eef2fb; --muted:#9aa7c4; --brand:#2f6bff; --brand-ink:#fff; --link:#5b8cff;
+  --green:#3ddc84; --green-bg:#0f3324; --amber:#f5b83d; --amber-bg:#3a2a08;
+  --red:#ff6b6b; --red-bg:#3a1418; --new:#c49bff; --new-bg:#2c1d4d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+
+/* proposal strip */
+.strip{background:linear-gradient(90deg,#2a1b52,#14234a);border-bottom:1px solid var(--line)}
+.strip .in{max-width:1120px;margin:0 auto;padding:14px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.strip p{margin:0;flex:1;min-width:260px;font-size:14px;color:#d9def0}
+.strip b{color:#fff}
+.views{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px}
+.views button{border:0;background:transparent;border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px;color:var(--muted)}
+.views button[aria-selected="true"]{background:var(--brand);color:#fff}
+
+/* nav */
+.nav{background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1120px;margin:0 auto;padding:0 16px;height:60px;display:flex;align-items:center;gap:18px}
+.logo{display:flex;align-items:center;gap:6px;font-weight:800}
+.logo svg{width:20px;height:20px}
+.ws{font-weight:700;font-size:14px;padding-left:14px;border-left:1px solid var(--line)}
+.links{display:flex;gap:16px;font-size:14px;color:var(--muted)}
+.links span.on{color:var(--link);background:var(--surface2);border-radius:10px;padding:6px 10px;margin:-6px -4px}
+.right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.pill{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700}
+.pts{background:var(--amber-bg);color:var(--amber);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800}
+.me{display:flex;align-items:center;gap:8px}
+.me i{width:26px;height:26px;border-radius:50%;background:#6b4f3a;display:inline-block}
+
+.page{max-width:1120px;margin:0 auto;padding:28px 16px 64px}
+.new{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--new);background:var(--new-bg);border:1px solid #5b3fa0;border-radius:6px;padding:1px 6px;vertical-align:2px}
+.ring{box-shadow:0 0 0 2px #7b55e0,0 0 24px rgba(123,85,224,.35)}
+
+/* settings view */
+.back{color:var(--link);font-size:14px;font-weight:600}
+h1{font-size:30px;margin:4px 0 2px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 18px;font-size:14px}
+.head{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.head .grow{flex:1;min-width:240px}
+.btn{border-radius:999px;padding:10px 18px;font-weight:700;border:1px solid var(--line);background:transparent}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.red{color:var(--red);background:var(--red-bg);border-color:#5a2026}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.agent{display:grid;grid-template-columns:1fr 440px;gap:18px;margin-top:8px}
+.who{display:flex;gap:14px}
+.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;flex:none;background:#24365f}
+.name{font-size:17px;font-weight:800}
+.role{font-size:12px;font-weight:700;border-radius:6px;padding:2px 8px;margin-left:8px;color:var(--green);background:var(--green-bg)}
+.meta{color:var(--muted);font-size:13px}
+.lnk{color:var(--link);font-size:13px;font-weight:700}
+.select{border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;margin-bottom:10px;background:var(--bg)}
+.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+.sw{margin-top:16px;border-radius:14px;padding:14px;background:var(--surface2);display:flex;gap:14px;align-items:center}
+.sw .txt{flex:1}
+.sw strong{display:block;font-size:15px}
+.sw small{color:var(--muted);font-size:13px}
+.toggle{appearance:none;width:48px;height:28px;border-radius:999px;background:#34436b;position:relative;flex:none;cursor:pointer;transition:background .2s;margin:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
+.toggle:checked{background:var(--green)}
+.toggle:checked::after{left:23px}
+.saved{font-size:12px;color:var(--green);margin-top:6px;min-height:18px}
+
+/* inbox view */
+.frame{background:var(--nav);border:1px solid var(--line);border-radius:18px;padding:18px}
+.crumbs{color:var(--muted);font-size:14px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.crumbs b{color:var(--ink)}
+.row1{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.inbox-btn{background:var(--brand);border:0;border-radius:10px;padding:8px 14px;font-weight:700;color:#fff}
+.count{display:inline-block;min-width:18px;text-align:center;font-size:11px;border-radius:6px;padding:0 5px;margin-left:6px;background:rgba(255,255,255,.18)}
+.status{margin-left:auto;display:flex;gap:14px;background:var(--surface);border-radius:12px;padding:8px 14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.status b{color:var(--ink)}
+.how{display:flex;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.how p{margin:2px 0 0;color:#c4cde2;font-size:14px}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:14px;font-size:14px;overflow-x:auto}
+.tabs span{padding:8px 0;color:var(--muted);white-space:nowrap}
+.tabs span.on{color:var(--ink);font-weight:700;border-bottom:2px solid var(--brand)}
+.tabs .count{background:var(--surface2)}
+.ask{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.bot{width:34px;height:34px;border-radius:50%;background:#3a2410;display:grid;place-items:center;flex:none}
+.ask .txt{flex:1;min-width:0}
+.ask .q{font-weight:700}
+.ask .meta{margin-top:2px}
+.sev{font-size:11px;font-weight:800;border-radius:6px;padding:1px 7px;margin-left:6px}
+.sev.low{color:var(--green);background:var(--green-bg)} .sev.high{color:var(--red);background:var(--red-bg)}
+.ask .acts{display:flex;gap:8px;flex:none}
+.ask .acts button{border-radius:10px;padding:7px 12px;font-weight:700;font-size:13px;border:1px solid var(--line);background:transparent}
+.ask .acts .yes{background:var(--brand);border-color:var(--brand);color:#fff}
+.started{border:1px dashed #3b6b52;background:#0d2219;border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:14px}
+.started b{color:var(--green)}
+.started ul{margin:6px 0 0;padding-left:18px;color:#c4cde2}
+.empty{text-align:center;padding:36px 16px;border:1px solid var(--line);border-radius:14px}
+.empty b{display:block;font-size:16px}
+.empty span{color:var(--muted);font-size:14px}
+.hint{margin-top:14px;color:var(--muted);font-size:13px}
+.hint a{color:var(--link);cursor:pointer;text-decoration:underline}
+footer{max-width:1120px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:12px}
+
+@media (max-width:900px){
+  .agent{grid-template-columns:1fr}
+  .links{display:none}
+  .actions{justify-content:flex-start}
+  .status{margin-left:0}
+}
+@media (max-width:560px){
+  .me span,.pill{display:none}
+  .ask{flex-wrap:wrap}
+  .ask .acts{width:100%;padding-left:46px}
+  h1{font-size:26px}
+}
+</style>
+</head>
+<body>
+
+<div class="strip"><div class="in">
+  <p><b>Proposal by Vee:</b> agents must ask before taking <b>any</b> work, so even a typo fix waits for a person. One new switch lets agents take <b>small fixes</b> on their own. Flip it in Agents, then check the Inbox.</p>
+  <div class="views" role="tablist">
+    <button role="tab" id="tab-settings" aria-selected="true">1 · Agents settings</button>
+    <button role="tab" id="tab-inbox" aria-selected="false">2 · Inbox</button>
+  </div>
+</div></div>
+
+<div class="nav"><div class="in">
+  <span class="logo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h14l-9 7h9L3 17l9-7H3z" fill="#2f6bff"/></svg>ziki</span>
+  <span class="ws">Ziki ⌄</span>
+  <div class="links"><span id="nav-product">◎ Product</span><span>◁ Marketing</span><span>◇ Security</span></div>
+  <div class="right">
+    <span class="pill">Agents ⌄</span>
+    <span class="me"><i></i><span>Vivian Nduka</span></span>
+    <span class="pts">🏆 1227 pts</span>
+  </div>
+</div></div>
+
+<!-- VIEW 1: settings -->
+<main class="page" id="view-settings">
+  <span class="back">← Back to settings</span>
+  <div class="head">
+    <div class="grow">
+      <h1>Your agents</h1>
+      <p class="sub">Each agent has its own key. Copy sends that key and this site to that agent only.</p>
+    </div>
+    <button class="btn">Agent audit log</button>
+    <button class="btn primary">Create agent</button>
+  </div>
+
+  <div class="card agent">
+    <div>
+      <div class="who">
+        <div class="av">CA</div>
+        <div>
+          <div><span class="name">ChatGPT Assistant</span><span class="role">Contributor</span></div>
+          <div class="meta">GPT-4o</div>
+          <div class="meta">Last used 3 days ago · Added Oct 22, 2026</div>
+          <span class="lnk">Messages and instructions</span>
+        </div>
+      </div>
+
+      <label class="sw ring" for="small">
+        <div class="txt">
+          <strong>Take small fixes without asking me <span class="new">NEW</span></strong>
+          <small>Low-severity issues start right away. Anything bigger still waits in your Inbox.</small>
+        </div>
+        <input type="checkbox" class="toggle" id="small">
+      </label>
+      <div class="saved" id="saved" aria-live="polite"></div>
+    </div>
+    <div>
+      <div class="select"><span>Contributor</span><span>⌄</span></div>
+      <div class="select"><span>Ziki</span><span>⌄</span></div>
+      <div class="actions">
+        <button class="btn">Regenerate key</button>
+        <button class="btn red">Revoke</button>
+        <button class="btn red">Delete</button>
+      </div>
+    </div>
+  </div>
+  <p class="hint">Flip the switch, then open <a id="go-inbox">2 · Inbox</a> to see the difference.</p>
+</main>
+
+<!-- VIEW 2: inbox -->
+<main class="page" id="view-inbox" hidden>
+  <div class="frame">
+    <div class="crumbs">Ziki › <b>Issues</b></div>
+    <div class="row1">
+      <button class="inbox-btn">Inbox <span class="count" id="c1">0</span></button>
+      <div class="status"><span><b>Open</b> 109</span><span><b>In progress</b> <span id="prog">46</span></span><span><b>Done</b> 101</span><span><b>All</b> 262</span></div>
+    </div>
+    <div class="how">
+      <div>📥</div>
+      <div><b>How the Inbox works</b>
+        <p>Agents work through issues on their own and stop here when they need a person: to answer a question, give feedback on a design, or weigh in on a new idea.</p></div>
+    </div>
+    <div class="tabs">
+      <span class="on">Need your input <span class="count" id="c2">0</span></span>
+      <span>Design feedback needed <span class="count">0</span></span>
+      <span>New ideas <span class="count">0</span></span>
+    </div>
+    <div id="list"></div>
+  </div>
+  <p class="hint">Now go back to <a id="go-settings">1 · Agents settings</a> and flip the switch the other way.</p>
+</main>
+
+<footer>Proposal mock-up for HNG 15, made to look like Ziki. Made-up issues; nothing here connects to the real site.</footer>
+
+<script>
+const ISSUES = [
+  { id:"#212", title:"Typo on the onboarding screen", sev:"low" },
+  { id:"#207", title:"Button colour too faint in dark mode", sev:"low" },
+  { id:"#198", title:"Payments sometimes charged twice", sev:"high" },
+];
+const done = new Set();          // questions you've answered
+const small = document.getElementById("small");
+
+function renderInbox(){
+  const list = document.getElementById("list");
+  const auto = small.checked ? ISSUES.filter(i => i.sev === "low") : [];
+  const asks = ISSUES.filter(i => !auto.includes(i) && !done.has(i.id));
+  list.innerHTML = "";
+
+  if (auto.length){
+    const box = document.createElement("div"); box.className = "started";
+    box.innerHTML = `<b>✓ ${auto.length} small fixes started on their own</b> <span class="new">NEW</span>
+      <ul>${auto.map(i => `<li>ChatGPT Assistant took ${i.id} ${i.title}</li>`).join("")}</ul>`;
+    list.appendChild(box);
+  }
+  for (const i of asks){
+    const el = document.createElement("div"); el.className = "ask";
+    el.innerHTML = `<div class="bot">🤖</div>
+      <div class="txt"><div class="q">ChatGPT Assistant wants to take ${i.id}</div>
+      <div class="meta">${i.title}<span class="sev ${i.sev}">${i.sev === "low" ? "Low" : "High"}</span></div></div>
+      <div class="acts"><button class="yes">Allow</button><button>Decline</button></div>`;
+    el.querySelectorAll("button").forEach(b => b.onclick = () => { done.add(i.id); renderInbox(); });
+    list.appendChild(el);
+  }
+  if (!asks.length && !auto.length){
+    list.innerHTML = `<div class="empty"><b>Nothing here right now.</b><span>No agent is waiting on an answer.</span></div>`;
+  } else if (!asks.length){
+    list.insertAdjacentHTML("beforeend", `<div class="empty"><b>Nothing needs you right now.</b><span>No agent is waiting on an answer.</span></div>`);
+  }
+  document.getElementById("c1").textContent = asks.length;
+  document.getElementById("c2").textContent = asks.length;
+  document.getElementById("prog").textContent = 46 + auto.length;
+}
+
+function show(view){
+  const s = view === "settings";
+  document.getElementById("view-settings").hidden = !s;
+  document.getElementById("view-inbox").hidden = s;
+  document.getElementById("tab-settings").setAttribute("aria-selected", s);
+  document.getElementById("tab-inbox").setAttribute("aria-selected", !s);
+  document.getElementById("nav-product").className = s ? "" : "on";
+  if (!s) renderInbox();
+  window.scrollTo(0, 0);
+}
+
+small.addEventListener("change", () => {
+  done.clear();
+  document.getElementById("saved").textContent = small.checked
+    ? "Saved. Small fixes will start without asking you."
+    : "Saved. Your agent will ask before taking any work.";
+});
+document.getElementById("tab-settings").onclick = () => show("settings");
+document.getElementById("tab-inbox").onclick = () => show("inbox");
+document.getElementById("go-inbox").onclick = () => show("inbox");
+document.getElementById("go-settings").onclick = () => show("settings");
+</script>
+</body>
+</html>
