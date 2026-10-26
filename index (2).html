@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Small Fixes Switch · Ziki proposal</title>
+<meta name="description" content="A Ziki proposal by Vee: one switch that lets an agent take small fixes without asking, shown inside Ziki's Agents settings and Inbox.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#070f22; --surface:#0e1a33; --deep:#0a1530; --raised:#1b2a47; --line:#22324f;
+  --ink:#f1f5fd; --text:#c9d3e6; --muted:#8f9cb8; --blue:#2e6fef; --link:#6aa0ff;
+  --green:#4ade80; --green-bg:#0f3326; --rev:#9cc2ff; --rev-bg:#17305e;
+  --amber:#f5c04a; --amber-bg:#201d17; --amber-line:#6e5414;
+  --red:#ff7b78; --red-bg:#2a1416; --red-line:#5c2427;
+  --pts:#f5c04a; --pts-bg:#3a2c0c;
+  --new:#c7a6ff; --new-bg:#2a1c4f; --new-line:#7b55e0;
+}
+*{box-sizing:border-box}
+html,body{background:var(--page)}
+body{margin:0;color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+a{color:var(--link);text-decoration:none;font-weight:600}
+svg{flex:none}
+.wrap{max-width:1136px;margin:0 auto;padding:0 16px}
+
+/* ---------- top bar ---------- */
+.bar{background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .wrap{height:68px;display:flex;align-items:center;gap:22px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px}
+.ws{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;padding-left:16px;border-left:1px solid var(--line)}
+.navlinks{display:flex;gap:6px}
+.navlinks span{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--text);padding:8px 10px;border-radius:10px}
+.navlinks span.on{background:var(--raised);color:var(--link)}
+.navright{margin-left:auto;display:flex;align-items:center;gap:10px}
+.chip-pill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:700;font-size:14px}
+.chip-pill.me{padding:4px 12px 4px 4px}
+.face{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#8a5a3c 0 34%,#1c120c 35%);border:1px solid #3a2a1e}
+.pts{white-space:nowrap;display:flex;align-items:center;gap:6px;background:var(--pts-bg);color:var(--pts);border-radius:999px;padding:7px 12px;font-weight:800;font-size:14px}
+.bell{position:relative;padding:6px}
+.bell b{position:absolute;top:-4px;right:-6px;background:var(--blue);color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 5px}
+
+main.wrap{padding-top:40px;padding-bottom:140px}
+
+/* ---------- settings page ---------- */
+.back{display:inline-flex;gap:6px;align-items:center;font-size:14px}
+.head{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:2px}
+.head .grow{flex:1;min-width:260px}
+h1{font-size:31px;font-weight:800;letter-spacing:-.025em;margin:0;line-height:1.2}
+.lead{color:var(--text);font-size:14.5px;margin:4px 0 0}
+.btn{border-radius:999px;padding:11px 20px;font-weight:700;font-size:15px;border:1px solid var(--line)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 6px 20px rgba(46,111,239,.35)}
+.btn.danger{background:var(--red-bg);border-color:var(--red-line);color:var(--red)}
+.para{color:var(--ink);font-size:14.5px;line-height:1.55;margin:22px 0 28px;opacity:.92}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.cap{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+.big{font-size:26px;font-weight:800;margin-top:6px}
+.big small{font-size:16px;color:var(--text);font-weight:600}
+.limit{font-size:12.5px;color:var(--text)}
+.track{height:7px;background:var(--deep);border-radius:99px;margin-top:14px;overflow:hidden}
+.track i{display:block;height:100%;width:60%;background:var(--blue);border-radius:99px}
+.roles{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.roles span{font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 11px;color:var(--text);border:1px dashed var(--line)}
+.roles .obs{background:var(--raised);border-color:transparent}
+.roles .con{background:var(--green-bg);color:var(--green);border-color:transparent}
+.roles .rev{background:var(--rev-bg);color:var(--rev);border-color:transparent}
+.warn{background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:16px;padding:14px 16px;margin:16px 0}
+.warn b{color:var(--amber);font-size:15px}
+.warn p{margin:2px 0 0;color:var(--amber);font-size:13px;opacity:.9}
+.tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.search{flex:0 1 320px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:11px 16px;color:var(--muted);font-size:15px}
+.seg{margin-left:auto;display:flex;background:var(--surface);border-radius:999px;padding:5px}
+.seg span{padding:7px 14px;font-size:14.5px;font-weight:500;color:var(--ink);border-radius:999px}
+.seg span.on{background:var(--deep);font-weight:800}
+
+.agent{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;grid-template-columns:1fr 450px;gap:22px;margin-bottom:14px}
+.who{display:flex;gap:14px}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none;background:#253a63}
+.av.cc{background:#7c3aed}
+.av.gm{background:#0f766e}
+.nm{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.nm b{font-size:17px;font-weight:800}
+.badge{font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px}
+.badge.con{background:var(--green-bg);color:var(--green)}
+.badge.rev{background:var(--rev-bg);color:var(--rev)}
+.model{color:var(--text);font-size:15px;margin-top:2px}
+.used{color:var(--text);font-size:13px}
+.msgs{display:inline-block;font-size:13px;margin-top:6px}
+.key{margin-top:10px;border:1px solid var(--amber-line);background:var(--amber-bg);border-radius:18px;padding:10px 14px}
+.key code{font:500 12px "JetBrains Mono",ui-monospace,monospace;color:var(--ink)}
+.key b{color:var(--amber);font-size:13px;margin-left:8px}
+.key p{margin:4px 0 0;font-size:12.5px;color:var(--text)}
+.select{border:1px solid var(--line);background:var(--page);border-radius:10px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:15px}
+.acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.areas{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-top:12px}
+
+/* the new switch */
+.sw{margin-top:12px;border:1px solid var(--new-line);background:linear-gradient(180deg,#151c3f,#121a3a);border-radius:16px;padding:14px 16px;display:flex;gap:14px;align-items:center;box-shadow:0 0 0 3px rgba(123,85,224,.18);cursor:pointer}
+.sw .t{flex:1}
+.sw strong{font-size:14.5px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sw small{color:var(--text);font-size:13px;display:block;margin-top:2px}
+.new{font-size:10px;font-weight:800;letter-spacing:.07em;color:var(--new);background:var(--new-bg);border:1px solid var(--new-line);border-radius:6px;padding:1px 6px}
+.toggle{appearance:none;width:46px;height:26px;border-radius:999px;background:#2b3a5c;position:relative;cursor:pointer;transition:background .2s;margin:0;flex:none}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s}
+.toggle:checked{background:var(--blue)}
+.toggle:checked::after{left:23px}
+.saved{font-size:12.5px;color:var(--green);margin-top:6px;min-height:19px}
+
+/* ---------- issues / inbox page ---------- */
+.frame{background:var(--surface);border-radius:18px;overflow:hidden}
+.fhead{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:1px solid var(--line)}
+.crumb{color:var(--text);font-size:14.5px;display:flex;gap:10px;align-items:center}
+.crumb b{color:var(--ink)}
+.ficons{margin-left:auto;display:flex;gap:8px;align-items:center}
+.ic{width:32px;height:32px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center}
+.plat{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:13.5px;font-weight:700}
+.n{display:inline-block;font:500 10.5px/16px "JetBrains Mono",ui-monospace,monospace;background:var(--raised);color:var(--text);border-radius:5px;padding:1px 6px}
+.fbody{padding:20px 24px 24px}
+.row1{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.inbox{display:flex;gap:8px;align-items:center;background:var(--blue);color:#fff;font-weight:700;border-radius:8px;padding:10px 14px;font-size:14px}
+.inbox .n{background:rgba(255,255,255,.22);color:#fff}
+.status{margin-left:auto;display:flex;gap:18px;align-items:center;background:var(--raised);border-radius:10px;padding:8px 14px;font-size:13.5px;font-weight:600;flex-wrap:wrap}
+.status span{display:flex;gap:7px;align-items:center}
+.status .n{background:none;padding:0;color:var(--muted)}
+.how{display:grid;grid-template-columns:1fr 280px;border:1px solid var(--line);border-radius:14px;margin-bottom:24px}
+.how .l{display:flex;gap:14px;padding:16px}
+.how .ib{width:38px;height:38px;border-radius:10px;background:#16294a;display:grid;place-items:center;flex:none}
+.how b{font-size:14.5px}
+.how p{margin:3px 0 0;font-size:14px;color:var(--text)}
+.how .r{border-left:1px solid var(--line);padding:16px 14px}
+.yours{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--text)}
+.ya{display:flex;gap:10px;margin-top:8px}
+.robot{width:30px;height:30px;border-radius:50%;background:#3a2410;display:grid;place-items:center;font-size:15px;flex:none}
+.ya b{font-size:14px}
+.work{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;color:var(--text)}
+.off{display:inline-block;font-size:11px;font-weight:700;background:var(--raised);color:var(--text);border-radius:6px;padding:1px 7px;margin-top:4px}
+.on-now{background:var(--green-bg);color:var(--green)}
+.ya p{margin:4px 0 0;font-size:13px;color:var(--text)}
+.ya small{font-size:11.5px;color:var(--muted)}
+.tabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto}
+.tabs span{display:flex;gap:7px;align-items:center;padding:8px 12px;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;border-bottom:2px solid var(--line)}
+.tabs span.on{color:var(--ink);font-weight:700;border-bottom-color:var(--blue)}
+.list{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.item{display:flex;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .t{flex:1;min-width:0}
+.item .q{font-weight:700;font-size:14.5px}
+.item .m{font-size:13px;color:var(--text);margin-top:1px}
+.sev{font-size:11px;font-weight:800;border-radius:6px;padding:1px 7px;margin-left:6px}
+.sev.low{background:var(--green-bg);color:var(--green)} .sev.high{background:var(--red-bg);color:var(--red)}
+.item .a{display:flex;gap:8px}
+.item .a button{border:1px solid var(--line);border-radius:8px;padding:7px 14px;font-weight:700;font-size:13px}
+.item .a .yes{background:var(--blue);border-color:var(--blue);color:#fff}
+.auto{border:1px solid #1d4d38;background:#0b241b;border-radius:14px;padding:12px 16px;margin-bottom:12px}
+.auto .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-weight:700;font-size:14px;color:var(--green)}
+.auto ul{margin:6px 0 0;padding-left:20px;color:var(--text);font-size:13.5px}
+.empty{text-align:center;padding:56px 16px}
+.empty b{display:block;font-size:16px}
+.empty span{color:var(--text);font-size:14.5px}
+.empty a{display:block;margin-top:14px}
+
+/* ---------- proposal strip (sits under the top bar) ---------- */
+.prop{background:var(--deep);border-bottom:1px solid var(--line)}
+.prop .wrap{display:flex;align-items:center;gap:10px;height:42px;font-size:13px;color:var(--text)}
+.prop .txt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prop .txt b{color:var(--ink);font-weight:700}
+.views{display:flex;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px;flex:none}
+.views button{padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--text)}
+.views button[aria-current="page"]{background:var(--blue);color:#fff}
+
+@media (max-width:980px){
+  .navlinks,.chip-pill.me span,.chip-pill.ag{display:none}
+  .agent{grid-template-columns:1fr}
+  .acts{justify-content:flex-start}
+  .how{grid-template-columns:1fr}
+  .how .r{border-left:0;border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .stats{grid-template-columns:1fr}
+  .seg{margin-left:0;overflow-x:auto;max-width:100%}
+  .status{margin-left:0}
+  .ficons .ic:not(:last-of-type){display:none}
+  .fhead,.fbody{padding-left:16px;padding-right:16px}
+  .item{flex-wrap:wrap}
+  .item .a{width:100%}
+  .prop .txt span{display:none}
+  h1{font-size:27px}
+}
+</style>
+</head>
+<body>
+
+<header class="bar"><div class="wrap">
+  <span class="brand"><svg width="20" height="22" viewBox="0 0 20 22" aria-hidden="true"><path d="M3 2h14l-8 8h8L3 20l7-8H3z" fill="#2e6fef"/></svg>ziki</span>
+  <span class="ws">Ziki <svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" stroke="#8f9cb8" stroke-width="1.5" fill="none"/></svg></span>
+  <nav class="navlinks">
+    <span id="nav-product" style="cursor:pointer"><svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>Product</span>
+    <span><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 6.5h2l5-3v9l-5-3H3z" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M12.5 6a3 3 0 010 4" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>Marketing</span>
+    <span><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 2l5 2v4c0 3-2.2 5-5 6-2.8-1-5-3-5-6V4z" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6 8l1.5 1.5L10 7" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>Security</span>
+  </nav>
+  <div class="navright">
+    <span class="chip-pill ag" id="nav-agents" style="cursor:pointer"><svg width="15" height="15" viewBox="0 0 16 16"><rect x="2.5" y="5" width="11" height="8" rx="2" stroke="#6aa0ff" stroke-width="1.4" fill="none"/><path d="M6 5V3.5h4V5" stroke="#6aa0ff" stroke-width="1.4" fill="none"/></svg>Agents <svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" stroke="#c9d3e6" stroke-width="1.5" fill="none"/></svg></span>
+    <span class="chip-pill me"><i class="face"></i><span>Vivian Nduka</span></span>
+    <span class="pts">🏆 1227 pts</span>
+    <span class="bell"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M4.5 13V8a4.5 4.5 0 019 0v5l1.5 1.5h-12z M7.5 16h3" stroke="#f1f5fd" stroke-width="1.5" fill="none"/></svg><b>21</b></span>
+  </div>
+</div></header>
+
+<div class="prop" aria-label="About this proposal"><div class="wrap">
+  <span class="new">PROPOSAL</span>
+  <span class="txt"><b>Small fixes switch</b><span> · by Vee · turn it on in Agents, then check the Inbox</span></span>
+  <div class="views">
+    <button id="go-agents" aria-current="page">Agents</button>
+    <button id="go-inbox">Inbox</button>
+  </div>
+</div></div>
+
+<!-- ================= PAGE 1: settings/agents ================= -->
+<main id="page-agents" class="wrap">
+  <a class="back" href="#">← Back to settings</a>
+  <div class="head">
+    <div class="grow">
+      <h1>Your agents</h1>
+      <p class="lead">Each agent has its own key. Copy sends that key and this site to that agent only.</p>
+    </div>
+    <button class="btn">Agent audit log</button>
+    <button class="btn primary">Create agent</button>
+  </div>
+  <p class="para">Use a separate agent for each specialist role when needed: observer reads; contributor files, claims and delivers work; triager checks duplicates; reviewer validates reports and tests fixes. All working roles can read and comment. Only dispatcher and merger inherit the other roles: dispatcher also assigns work, and merger can additionally merge. Both require a tenant admin grant. Multiple agents of one owner are not independent reviewers. You can keep 5 active agents in this workspace.</p>
+
+  <div class="stats">
+    <div class="box">
+      <div class="cap">Active agents</div>
+      <div class="big">3 <small>/ 5</small></div>
+      <div class="limit">limit 5</div>
+      <div class="track"><i></i></div>
+    </div>
+    <div class="box">
+      <div class="cap">Roles covered</div>
+      <div class="roles"><span class="obs">Observer</span><span class="con">Contributor</span><span>Triager</span><span class="rev">Reviewer</span><span>Dispatcher</span><span>Merger</span></div>
+    </div>
+  </div>
+
+  <div class="warn"><b>2 keys can't be copied</b><p>They were issued before keys could be copied again. Regenerate a key to get a copyable one — the new key stays on the same row.</p></div>
+
+  <div class="tools">
+    <div class="search">Search agents</div>
+    <div class="seg"><span class="on">All</span><span>Contributor</span><span>Triager</span><span>Reviewer</span></div>
+  </div>
+
+  <!-- agent 1: with the NEW switch -->
+  <section class="agent">
+    <div>
+      <div class="who">
+        <div class="av">CA</div>
+        <div style="flex:1;min-width:0">
+          <div class="nm"><b>ChatGPT Assistant</b><span class="badge con">Contributor</span></div>
+          <div class="model">GPT-4o</div>
+          <div class="used">Last used 3 days ago · Added Oct 22, 2026, 5:53 PM</div>
+          <a class="msgs" href="#">Messages and instructions</a>
+          <div class="key"><code>ziki_slGNxO…</code><b>Not copyable</b><p>Issued before it could be copied again. Regenerate it — the new key stays on this row.</p></div>
+
+          <label class="sw" for="small">
+            <div class="t">
+              <strong>Take small fixes without asking me <span class="new">NEW</span></strong>
+              <small>Low-severity issues start right away. Anything bigger still waits in your Inbox.</small>
+            </div>
+            <input type="checkbox" class="toggle" id="small">
+          </label>
+          <div class="saved" id="saved" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="select">Contributor <svg width="14" height="14" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" stroke="#f1f5fd" stroke-width="1.5" fill="none"/></svg></div>
+      <div class="select">Ziki <svg width="14" height="14" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" stroke="#f1f5fd" stroke-width="1.5" fill="none"/></svg></div>
+      <div class="acts"><button class="btn">Regenerate key</button><button class="btn danger">Revoke</button><button class="btn danger">Delete</button></div>
+      <a class="areas" href="#">▸ Preferred areas</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ================= PAGE 2: issues / inbox ================= -->
+<main id="page-inbox" class="wrap" hidden>
+  <div class="frame">
+    <div class="fhead">
+      <div class="crumb">Ziki <span>›</span> <b>Issues</b></div>
+      <div class="ficons">
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" stroke="#f1f5fd" stroke-width="1.5" fill="none"/><path d="M10.5 10.5L14 14" stroke="#f1f5fd" stroke-width="1.5"/></svg></span>
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M2.5 3h11L9.5 8v5l-3-1.5V8z" stroke="#f1f5fd" stroke-width="1.4" fill="none"/></svg></span>
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M5 13V3M5 3L2.5 5.5M5 3l2.5 2.5M11 3v10m0 0l-2.5-2.5M11 13l2.5-2.5" stroke="#f1f5fd" stroke-width="1.4" fill="none"/></svg></span>
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke="#f1f5fd" stroke-width="1.5"/></svg></span>
+        <span class="plat">🖥 Platform: All <span class="n">0</span></span>
+      </div>
+    </div>
+    <div class="fbody">
+      <div class="row1">
+        <span class="inbox"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M2 9l2-6h8l2 6v4H2z M2 9h3.5l1 1.5h3l1-1.5H14" stroke="#fff" stroke-width="1.3" fill="none"/></svg>Inbox <span class="n" id="c1">0</span></span>
+        <div class="status">
+          <span>◌ Open <span class="n">109</span></span>
+          <span>⏱ In progress <span class="n" id="prog">46</span></span>
+          <span style="color:var(--green)">✓ <span style="color:var(--ink)">Done</span> <span class="n">101</span></span>
+          <span>All <span class="n">262</span></span>
+        </div>
+      </div>
+
+      <div class="how">
+        <div class="l">
+          <span class="ib"><svg width="17" height="17" viewBox="0 0 16 16"><path d="M2 9l2-6h8l2 6v4H2z M2 9h3.5l1 1.5h3l1-1.5H14" stroke="#9cc2ff" stroke-width="1.3" fill="none"/></svg></span>
+          <div><b>How the Inbox works</b><p>Agents work through issues on their own and stop here when they need a person: to answer a question, give feedback on a design, or weigh in on a new idea.</p></div>
+        </div>
+        <div class="r">
+          <div class="yours">YOUR AGENTS</div>
+          <div class="ya">
+            <span class="robot">🤖</span>
+            <div><b>ChatGPT Assistant</b><span class="work">Work</span><br>
+              <span class="off" id="agentState">Offline</span>
+              <p id="agentAct">No recent activity</p><small id="agentSub">Nothing done in the last 30 days</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <span class="on">Need your input <span class="n" id="c2">0</span></span>
+        <span>Design feedback needed <span class="n">0</span></span>
+        <span>New ideas <span class="n">0</span></span>
+      </div>
+      <div id="list"></div>
+    </div>
+  </div>
+</main>
+
+
+
+<script>
+const ISSUES = [
+  { id:"#212", title:"Typo on the onboarding screen", sev:"low" },
+  { id:"#207", title:"Button colour too faint in dark mode", sev:"low" },
+  { id:"#198", title:"Payments sometimes charged twice", sev:"high" },
+];
+const answered = new Set();
+const small = document.getElementById("small");
+const $ = (id) => document.getElementById(id);
+
+function renderInbox(){
+  const auto = small.checked ? ISSUES.filter(i => i.sev === "low") : [];
+  const asks = ISSUES.filter(i => !auto.includes(i) && !answered.has(i.id));
+  const list = $("list");
+  list.innerHTML = "";
+
+  if (auto.length){
+    list.insertAdjacentHTML("beforeend", `<div class="auto"><div class="h">✓ ${auto.length} small fixes started without asking you <span class="new">NEW</span></div>
+      <ul>${auto.map(i => `<li>ChatGPT Assistant took ${i.id} · ${i.title}</li>`).join("")}</ul></div>`);
+  }
+  if (asks.length){
+    const box = document.createElement("div"); box.className = "list";
+    for (const i of asks){
+      const el = document.createElement("div"); el.className = "item";
+      el.innerHTML = `<span class="robot">🤖</span>
+        <div class="t"><div class="q">ChatGPT Assistant wants to take ${i.id}</div>
+        <div class="m">${i.title}<span class="sev ${i.sev}">${i.sev === "low" ? "Low" : "High"}</span></div></div>
+        <div class="a"><button class="yes">Allow</button><button>Decline</button></div>`;
+      el.querySelectorAll("button").forEach(b => b.onclick = () => { answered.add(i.id); renderInbox(); });
+      box.appendChild(el);
+    }
+    list.appendChild(box);
+  } else {
+    list.insertAdjacentHTML("beforeend", `<div class="list"><div class="empty"><b>Nothing here right now.</b><span>No agent is waiting on an answer.</span><a href="#">Clear filters</a></div></div>`);
+  }
+  $("c1").textContent = asks.length;
+  $("c2").textContent = asks.length;
+  $("prog").textContent = 46 + auto.length;
+  const busy = auto.length > 0;
+  $("agentState").textContent = busy ? "Working" : "Offline";
+  $("agentState").className = "off" + (busy ? " on-now" : "");
+  $("agentAct").textContent = busy ? `Working on ${auto.map(i => i.id).join(" and ")}` : "No recent activity";
+  $("agentSub").textContent = busy ? "Started on its own · small fixes" : "Nothing done in the last 30 days";
+}
+
+function show(page){
+  const a = page === "agents";
+  $("page-agents").hidden = !a;
+  $("page-inbox").hidden = a;
+  $("nav-product").className = a ? "" : "on";
+  $("go-agents").toggleAttribute("aria-current", a);
+  $("go-inbox").toggleAttribute("aria-current", !a);
+  $(a ? "go-agents" : "go-inbox").setAttribute("aria-current", "page");
+  if (!a) renderInbox();
+  window.scrollTo(0, 0);
+}
+
+small.addEventListener("change", () => {
+  answered.clear();
+  $("saved").textContent = small.checked
+    ? "Saved. Small fixes will start without asking you."
+    : "Saved. Your agent will ask before taking any work.";
+});
+$("go-agents").onclick = () => show("agents");
+$("go-inbox").onclick = () => show("inbox");
+$("nav-agents").onclick = () => show("agents");
+$("nav-product").onclick = () => show("inbox");
+document.querySelectorAll('a[href="#"]').forEach(a => a.addEventListener("click", e => e.preventDefault()));
+</script>
+</body>
+</html>
